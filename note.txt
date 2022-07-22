@@ -1,0 +1,18 @@
+
+
+
+Admin
+------
+Admins create projects, assign managers, and have full read/write priviledges.
+
+Project Manager 
+-----------
+Project Managers manage one or more projects and assign tasks to employees.
+
+Employees
+-------
+Employees login to receive project tasks and track hours.
+
+
+Task တွေကို ၆ လတစ်ကြိမ်လောက် Auto Clean လုပ်တာပါရင်ရလား
+Complete Task တွေကို

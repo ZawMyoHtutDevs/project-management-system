@@ -20,7 +20,12 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'utype',
+        'phone',
         'password',
+        'department_id',
+        'bio',
+        'dob',
     ];
 
     /**
@@ -41,4 +46,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function department()
+    {
+        return $this->belongsTo(\App\Models\Department::class, 'department_id');
+    }
+
+    public function projects()
+    {
+        return $this->belongsToMany('App\Models\Project', 'project_user');
+    }
 }
