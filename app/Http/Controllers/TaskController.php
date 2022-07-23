@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Mail\Task as MailTask;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Attachment;
+use App\Models\Comment;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskCategory;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Notifications\Comment as NotificationsComment;
 use Auth;
 
 class TaskController extends Controller
@@ -20,22 +23,43 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        $tasks = Task::when($request->has("name"),function($q)use($request){
-            return $q->where("name","like","%".$request->get("name")."%");})
-            ->when($request->has("status"),function($q)use($request){
-                return $q->where("status","like","%".$request->get("status")."%");})
-            ->when($request->has("priority"),function($q)use($request){
-                return $q->where("priority","like","%".$request->get("priority")."%");})
-            ->when($request->has("start_date"),function($q)use($request){
-                return $q->where("start_date","like","%".$request->get("start_date")."%");})
-            ->when($request->has("end_date"),function($q)use($request){
-                return $q->where("end_date","like","%".$request->get("end_date")."%");})
-            ->when($request->has("task_category_id"),function($q)use($request){
-                return $q->where("task_category_id","like","%".$request->get("category_id")."%");})
-            ->when($request->has("end_date_orderby"),function($q)use($request){
-                return $q->orderby("end_date",$request->get("end_date_orderby"));})
-            ->orderby('created_at', 'desc')
-            ->paginate(16);
+        if(Auth::user()->utype == 'EMP'){
+            $user = User::find(Auth::user()->id);
+            $tasks = $user->tasks()->when($request->has("name"),function($q)use($request){
+                return $q->where("name","like","%".$request->get("name")."%");})
+                ->when($request->has("status"),function($q)use($request){
+                    return $q->where("status","like","%".$request->get("status")."%");})
+                ->when($request->has("priority"),function($q)use($request){
+                    return $q->where("priority","like","%".$request->get("priority")."%");})
+                ->when($request->has("start_date"),function($q)use($request){
+                    return $q->where("start_date","like","%".$request->get("start_date")."%");})
+                ->when($request->has("end_date"),function($q)use($request){
+                    return $q->where("end_date","like","%".$request->get("end_date")."%");})
+                ->when($request->has("task_category_id"),function($q)use($request){
+                    return $q->where("task_category_id","like","%".$request->get("category_id")."%");})
+                ->when($request->has("end_date_orderby"),function($q)use($request){
+                    return $q->orderby("end_date",$request->get("end_date_orderby"));})
+                ->orderby('created_at', 'desc')
+                ->paginate(16);
+        }else{
+            $tasks = Task::when($request->has("name"),function($q)use($request){
+                return $q->where("name","like","%".$request->get("name")."%");})
+                ->when($request->has("status"),function($q)use($request){
+                    return $q->where("status","like","%".$request->get("status")."%");})
+                ->when($request->has("priority"),function($q)use($request){
+                    return $q->where("priority","like","%".$request->get("priority")."%");})
+                ->when($request->has("start_date"),function($q)use($request){
+                    return $q->where("start_date","like","%".$request->get("start_date")."%");})
+                ->when($request->has("end_date"),function($q)use($request){
+                    return $q->where("end_date","like","%".$request->get("end_date")."%");})
+                ->when($request->has("task_category_id"),function($q)use($request){
+                    return $q->where("task_category_id","like","%".$request->get("category_id")."%");})
+                ->when($request->has("end_date_orderby"),function($q)use($request){
+                    return $q->orderby("end_date",$request->get("end_date_orderby"));})
+                ->orderby('created_at', 'desc')
+                ->paginate(16);
+        }
+        
         $taskCategories = TaskCategory::all();
         return view('tasks.index', compact('tasks', 'taskCategories'));
     }
@@ -57,6 +81,11 @@ class TaskController extends Controller
         $taskCategories = TaskCategory::all();
         return view('tasks.create_two', compact('project', 'taskCategories'));
     }
+
+    public function viewStyle($styleDetail){
+        session()->put('taskstyle', $styleDetail);
+        return redirect()->back();
+    } 
 
     /**
      * Store a newly created resource in storage.
@@ -110,8 +139,23 @@ class TaskController extends Controller
                 );
                 Mail::to($value->email)->send(new MailTask($email_data));
             }
+            foreach ($task->users as $item) {
+                $details = [
+        
+                    'greeting' => 'Hi'.'-'.$item->name,
+                        
+                    'data' => $item->name ." created a Task - ".$task->name,
+    
+                    'url' => route('projects.show', $task->id)
             
+                ];
+            
+            $item->notify(new NotificationsComment($details));
+            }
+
         }
+
+        
         
 
         return redirect()->route('tasks.index')->with('success', 'Task အသစ်ကိုထည့်သွင်းပြီးပါပြီ။');
@@ -136,6 +180,24 @@ class TaskController extends Controller
             $task->status = 'incomplete';
             $task->save();
         }
+        if(count($task->users)){
+
+           
+            foreach ($task->users as $item) {
+                $details = [
+        
+                    'greeting' => 'Hi'.'-'.$item->name,
+                        
+                    'data' => $item->name ." updated a Task status - ".$task->name,
+    
+                    'url' => route('projects.show', $task->id)
+            
+                ];
+            
+            $item->notify(new NotificationsComment($details));
+            }
+
+        }
         return redirect()->back()->with('success', 'Task Status ကိုပြင်ဆင်ပြီးပါပြီ။');
     }
 
@@ -149,11 +211,17 @@ class TaskController extends Controller
                 break;
 
             case 'comments':
-                return view('tasks.show.comments', compact('task'));
+                $comments = Comment::where('commentable_id', $task->id)
+                ->where('commentable_type', 'App\Models\Task')
+                ->orderBy('created_at', 'desc')->get();
+                return view('tasks.show.comments', compact('task', 'comments'));
                 break;
 
             case 'attachments':
-                return view('tasks.show.attachments', compact('task'));
+                $attachments = Attachment::where('attachmentable_id', $task->id)
+                ->where('attachmentable_type', 'App\Models\Task')
+                ->orderBy('created_at', 'desc')->get();
+                return view('tasks.show.attachments', compact('task', 'attachments'));
                 break;
             default:
                 return redirect()->route('tasks.show', $task->id);
@@ -210,13 +278,17 @@ class TaskController extends Controller
         // User
         $task->users()->sync($request->users);
 
+        
+
         return redirect()->route('tasks.index')->with('success', 'Task ကိုပြင်ဆင်ပြီးပါပြီ။');
+
+        
     }
 
     public function storeAttachment(Request $request, $id){
 
         $request->validate([
-            'file' => 'required|mimes:jpeg,png,jpg,gif,svg,zip,pdf,txt,ppt,docx,xlsx|max:51200',
+            'file' => 'required|mimes:jpeg,png,jpg,gif,svg,zip,pdf,txt,ppt,docx,xlsx,psd,ps,eps,prn,xls,pptx,doc,ai|max:51200',
         ]
         ,[
             'file.required' => 'နာမည်ထည့်ပေးရန် လိုအပ်ပါသည်။',
@@ -256,6 +328,39 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        // Sent Mail
+        if(count($task->users)){
+            
+            foreach ($task->users as $item) {
+                $details = [
+        
+                    'greeting' => 'Hi'.'-'.$item->name,
+                        
+                    'data' => $item->name ." created a Task - ".$task->name,
+    
+                    'url' => '/'
+            
+                ];
+            
+            $item->notify(new NotificationsComment($details));
+            }
+
+        }
+
+        if(count($task->comments)){
+            foreach ($task->comments as $value) {
+                Comment::where('id', '=', $value->id)->delete();
+            }
+        }
+        if(count($task->attachments)){
+            foreach ($task->attachments as $value) {
+                $attachmentTask = Attachment::find($value->id);
+                $del_main_image_path = public_path().'/backend/images/tasks/'.$attachmentTask->asset;
+                unlink($del_main_image_path);
+                $attachmentTask->delete();
+            }
+        }
+        $task->delete();
+        return redirect()->route('tasks.index')->with('success','Task ကိုပယ်ဖျက်ပြီးပါပြီ။');
     }
 }

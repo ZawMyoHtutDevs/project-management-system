@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('style')
-<link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
 @endsection
 
 {{-- Breadcrumb Data Here --}}
@@ -74,51 +73,29 @@
                                 <a class="nav-link " href="{{route('tasks.index')}}/{{$task->id}}/attachments">Attachments</a>
                             </li>
                         </ul>
-                        <div class="tab-content m-t-15 p-25">
+                        <div class="tab-content tab-content m-t-1 p-10">
                             <div class="tab-pane fade show active" id="task-details-attachment">
+                                <div class="text-md-right mb-2">
+                                    <button class="btn btn-primary m-r-5 ml-2 " data-toggle="modal" data-target="#commentModel">
+                                        <i class="anticon anticon-message"></i>
+                                        <span class="m-l-5">Write Comment</span>
+                                    </button>
+                                </div>
                                 <ul class="list-group list-group-flush">
+                                    @foreach ($comments as $item)
                                     <li class="list-group-item p-h-0">
-                                        <div class="media m-b-15">
-                                            <div class="avatar avatar-image">
-                                                <img src="assets/images/avatars/thumb-8.jpg" alt="">
-                                            </div>
+                                        <div class="media m-b-1">
+                                            
                                             <div class="media-body m-l-20">
                                                 <h6 class="m-b-0">
-                                                    <a href="" class="text-dark">Lillian Stone</a>
+                                                    <a href="" class="text-dark">{{$item->user->name}}</a>
                                                 </h6>
-                                                <span class="font-size-13 text-gray">28th Jul 2018</span>
+                                                <span class="font-size-13 text-gray">{{ Carbon\Carbon::parse($item->created_at)->format('d-M-Y') }}</span>
                                             </div>
                                         </div>
-                                        <p>The palatable sensation we lovingly refer to as The Cheeseburger has a distinguished and illustrious history. It was born from humble roots, only to rise to well-seasoned greatness.</p>
+                                        <div class="ml-3">{!! $item->comment !!}</div>
                                     </li>
-                                    <li class="list-group-item p-h-0">
-                                        <div class="media m-b-15">
-                                            <div class="avatar avatar-image">
-                                                <img src="assets/images/avatars/thumb-9.jpg" alt="">
-                                            </div>
-                                            <div class="media-body m-l-20">
-                                                <h6 class="m-b-0">
-                                                    <a href="" class="text-dark">Victor Terry</a>
-                                                </h6>
-                                                <span class="font-size-13 text-gray">28th Jul 2018</span>
-                                            </div>
-                                        </div>
-                                        <p>The palatable sensation we lovingly refer to as The Cheeseburger has a distinguished and illustrious history. It was born from humble roots, only to rise to well-seasoned greatness.</p>
-                                    </li>
-                                    <li class="list-group-item p-h-0">
-                                        <div class="media m-b-15">
-                                            <div class="avatar avatar-image">
-                                                <img src="assets/images/avatars/thumb-10.jpg" alt="">
-                                            </div>
-                                            <div class="media-body m-l-20">
-                                                <h6 class="m-b-0">
-                                                    <a href="" class="text-dark">Wilma Young</a>
-                                                </h6>
-                                                <span class="font-size-13 text-gray">28th Jul 2018</span>
-                                            </div>
-                                        </div>
-                                        <p>The palatable sensation we lovingly refer to as The Cheeseburger has a distinguished and illustrious history. It was born from humble roots, only to rise to well-seasoned greatness.</p>
-                                    </li>
+                                    @endforeach
                                 </ul>
                                 
                             </div>
@@ -189,8 +166,43 @@
         </div>
     </div>
 <!-- Content Wrapper END -->
+
+
+<div class="modal fade" id="commentModel">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal -->
+        <form method="POST" action="{{ route('comments.store') }}" >
+            @csrf
+            <div class="modal-content">
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="hidden" name="type" value="App\Models\Task">
+                        <input type="hidden" name="id" value="{{$task->id}}">
+                        <textarea name="comment" class="form-control  @error('comment') is-invalid @enderror" autocomplete="comment" rows="3">{!! old('comment')!!}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 @endsection
 
 @section('script')
+<script src="//cdn.ckeditor.com/4.19.0/standard/ckeditor.js"></script>
 
+<script>
+    
+    CKEDITOR.replace( 'comment',{
+        
+    } 
+    );
+    
+</script>
 @endsection

@@ -98,7 +98,7 @@
                                 <div id="file" class="dropzone"></div>
                             </div>
                             
-                            @foreach ($task->attachments as $item)
+                            @foreach ($attachments as $item)
                             <div class="file" style="min-width: 200px;">
                                 <div class="media align-items-center">
                                     @if ($item->extension == "png" || $item->extension == "jpg" || $item->extension == "jpeg" || $item->extension == "gif" )
@@ -145,7 +145,7 @@
                                             {{$mbSize}}
                                         </span>
                                         <span class="float-right">
-                                                <a href="{{asset('backend/images/tasks/'. $item->asset)}}" class="badge badge-pill badge-blue">Downlaod</a>
+                                                <a href="{{asset('backend/images/tasks/'. $item->asset)}}" class="badge badge-pill badge-blue" download>Downlaod</a>
                                                 
                                                 <span class="badge badge-pill badge-red" onclick="if(confirm('Are you sure you want to delete this data?')){document.getElementById('delete-form{{$item->id}}').submit(); }">Delete</span>
                                                 

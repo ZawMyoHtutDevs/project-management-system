@@ -77,7 +77,7 @@
                         <div class="tab-content m-t-15 p-25">
                             <div class="tab-pane fade show active" id="task-timers">
                                 <p>
-                                    {{$task->description}}
+                                    {!!$task->description!!}
                                 </p>
 
                                 

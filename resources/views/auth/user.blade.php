@@ -86,7 +86,7 @@
                                 {{-- Delete User --}}
                                 @if (Auth::user()->id != $data->id)
                                 
-                                <button class="btn btn-icon btn-hover btn-sm btn-rounded text-danger" type="submit" onclick="confirm('Are you sure you want to delete this item?'); event.preventDefault(); document.getElementById('delete-form{{$data->id}}').submit(); ">
+                                <button class="btn btn-icon btn-hover btn-sm btn-rounded text-danger" type="submit" onclick="if(confirm('Are you sure you want to delete this data?')){document.getElementById('delete-form{{$data->id}}').submit(); }">
                                     <i class="anticon anticon-delete"></i>
                                 </button>
                                 <form id="delete-form{{$data->id}}" method="POST" action="{{route('delete.user', $data->id)}}" >

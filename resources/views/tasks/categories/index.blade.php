@@ -88,7 +88,6 @@
                         <tr>
                             <th>Name</th>
                             <th>Tasks</th>
-                            <th>Department</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -102,9 +101,7 @@
                                 <td>
                                     {{count($item->tasks)}} - tasks
                                 </td>
-                                <td>
-                                    {{$item->department->name}}
-                                </td>
+                                
                                 <td>
                                     
                                     {{-- Edit and View --}}

@@ -6,7 +6,7 @@
                     <span class="icon-holder">
                         <i class="anticon anticon-dashboard"></i>
                     </span>
-                    <span class="title">Home</span>
+                    <span class="title">Dashboard</span>
                 </a>
             </li>
 
@@ -24,13 +24,14 @@
                     <li class="{{ Route::is('projects.*') ? 'active' : '' }}">
                         <a href="{{route('projects.index')}}">All Projects</a>
                     </li>
+                    @manager()
                     <li class="">
                         <a href="{{route('projects.create')}}">Create New</a>
                     </li>
                     <li class="{{ Route::is('categories.*') ? 'active' : '' }}">
                         <a href="{{route('categories.index')}}">Project Categories</a>
                     </li>
-                    
+                    @endmanager
                 </ul>
             </li>
 
@@ -48,6 +49,7 @@
                     <li class="{{ Route::is('tasks.*') ? 'active' : '' }}">
                         <a href="{{route('tasks.index')}}">All Tasks</a>
                     </li>
+                    @manager()
                     <li class="">
                         <a href="{{route('tasks.create.one')}}">Create New</a>
                     </li>
@@ -57,6 +59,7 @@
                     <li class="">
                         <a href="">Timer</a>
                     </li>
+                    @endmanager
                     
                 </ul>
             </li>
@@ -82,10 +85,21 @@
                     
                 </ul>
             </li>
+
+            {{-- Activiteis --}}
+            <li class="nav-item  {{ Route::is('activity.log') ? 'active' : '' }}">
+                <a class="" href="{{route('activity.log')}}">
+                    <span class="icon-holder">
+                        <i class="anticon anticon-hourglass"></i>
+                    </span>
+                    <span class="title">Activity Log</span>
+                </a>
+            </li>
+
             @endadmin
 
             
-            
+            @manager()
             {{-- Clients --}}
             <li class="nav-item  {{ Route::is('clients.*') ? 'active' : '' }}">
                 <a class="" href="{{route('clients.index')}}">
@@ -95,6 +109,7 @@
                     <span class="title">Clients</span>
                 </a>
             </li>
+            @endmanager
 
         </ul>
     </div>

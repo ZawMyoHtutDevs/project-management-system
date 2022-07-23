@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
@@ -20,7 +21,7 @@ use App\Http\Controllers\TaskController;
 |
 */
 
-Route::get('/', [HomeController::class, 'welcome'])->name('welcome');
+
 
 // Admin
 Route::group(['prefix' => 'dashboard', 'middleware' => ['admin','auth']], function () {
@@ -36,13 +37,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['admin','auth']], functi
     // Department
     Route::resource('departments', DepartmentController::class);
     
+    Route::get('/activity/log', [HomeController::class, 'activityLog'])->name('activity.log');
+    Route::post('/activity/delete', [HomeController::class, 'activityDelete'])->name('activity.delete.date');
 });
 
 // Manager
 Route::group(['prefix' => 'dashboard', 'middleware' =>  ['manager','auth']], function () {
     
     // Projects
-    Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+    
     Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
@@ -67,7 +70,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' =>  ['manager','auth']], fun
 
 
     // Tasks
-    Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('tasks/create/step/1', [TaskController::class, 'createStepOne'])->name('tasks.create.one');
     Route::get('tasks/create/step/2/{project_id}', [TaskController::class, 'createStepTwo'])->name('tasks.create.two');
     Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
@@ -93,8 +95,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' =>  ['employee','auth']], fu
     Route::get('clients/{client}', [ClientController::class, 'show'])->name('clients.show');
 
     // Show Project
-    Route::get('projects/{client}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::get('projects/{id}/{field}', [ProjectController::class, 'showField'])->name('projects.show.field');
+    
 
     // attachments
     Route::post('attachments/project/{id}', [ProjectController::class, 'storeAttachment'])->name('attachment.storeProject');
@@ -102,12 +106,28 @@ Route::group(['prefix' => 'dashboard', 'middleware' =>  ['employee','auth']], fu
     Route::delete('attachments/{id}', [ProjectController::class, 'destroyAttachment'])->name('attachment.destroy');
 
     // Show Task
+    Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
     Route::get('tasks/change/{task}', [TaskController::class, 'changeStatus'])->name('tasks.change.status');
     Route::get('tasks/{id}/{field}', [TaskController::class, 'showField'])->name('tasks.show.field');
 
+
+    // Comments
+    Route::post('comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('comments/{client}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('comments/{client}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+    // Change Grid and list Veiw
+    Route::get('/projectStyle/{styleDetail}', [ProjectController::class, 'viewStyle'])->name('project.style');
+    Route::get('/taskStyle/{styleDetail}', [TaskController::class, 'viewStyle'])->name('task.style');
+
+    // noti Delete
+    Route::get('/notification/delete/{id}', [HomeController::class, 'deleteNoti'])->name('notification.delete');
+    
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('home');
+    
 });
+Route::get('/', [HomeController::class, 'welcome'])->middleware('auth')->name('welcome');
 Auth::routes(['register' => false]);
 
-Route::get('/dashboard', [HomeController::class, 'index'])->name('home');
 Route::get('/task/share/{id}', [HomeController::class, 'shareTask'])->name('share.task');

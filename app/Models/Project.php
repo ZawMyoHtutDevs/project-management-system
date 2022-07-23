@@ -40,4 +40,8 @@ class Project extends Model
     {
         return $this->hasMany(\App\Models\Task::class, 'project_id');
     }
+
+    public function comments(){
+        return $this->morphMany(Comment::class, 'commentable');
+    }
 }

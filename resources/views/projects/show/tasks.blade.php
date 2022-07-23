@@ -140,7 +140,7 @@
                                                         $expire_time = strtotime(Carbon\Carbon::parse($item->end_date)->format('d-M-Y'));
                                                     @endphp 
                                                     @if ($expire_time < $today_time)
-                                                        style="color:red;"
+                                                        style="color:red  !important;"
                                                     @endif
                                                     >
                                                         Due Date : {{ Carbon\Carbon::parse($item->end_date)->format('d-M-Y') }}

@@ -115,7 +115,24 @@
                         </td>
                         <td>
                             {{-- need to edit --}}
-                            <span class="badge badge-warning">
+                            <span class="badge 
+                            @switch($item->status)
+                                        @case('not started')
+                                            badge-default
+                                            @break
+                                        @case('in progress')
+                                            badge-info
+                                            @break
+                                        @case('on hold')
+                                            badge-warning
+                                            @break
+                                        @case('cancled')
+                                            badge-dange
+                                            @break
+                                        @default
+                                            badge-success    
+                                    @endswitch
+                            ">
                                 {{$item->status}}
                             </span>
                         </td>
